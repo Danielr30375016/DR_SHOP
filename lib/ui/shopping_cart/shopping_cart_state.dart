@@ -9,7 +9,6 @@ class ShoppingCartState extends Equatable {
       ShoppingCartState(isLoading: isLoading ?? this.isLoading);
 
   @override
-  // TODO: implement props
   List<Object?> get props => [
         isLoading,
       ];
