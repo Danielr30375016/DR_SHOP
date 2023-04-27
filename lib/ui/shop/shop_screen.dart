@@ -16,6 +16,8 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
+  TextEditingController _controller = TextEditingController();
+
   bool switchActive = false;
   @override
   Widget build(BuildContext context) {
@@ -34,14 +36,14 @@ class _ShopScreenState extends State<ShopScreen> {
             });
             return const CircularProgressIndicator();
           } else {
-            return _body();
+            return _body(state);
           }
         },
       ))),
     );
   }
 
-  Widget _body() {
+  Widget _body(ShopState state) {
     return LayoutBuilder(builder: (context, constraints) {
       return SizedBox(
         width: constraints.maxWidth,
@@ -49,6 +51,8 @@ class _ShopScreenState extends State<ShopScreen> {
           children: [
             _switchTheme(context, constraints),
             _changePage(),
+            _textField(constraints),
+            _showData(state, constraints),
           ],
         ),
       );
@@ -94,6 +98,60 @@ class _ShopScreenState extends State<ShopScreen> {
         },
         icon: const Icon(Icons.skip_next),
       )),
+    );
+  }
+
+  Widget _textField(BoxConstraints constraints) {
+    return Padding(
+      padding: EdgeInsets.only(
+          top: 20,
+          left: constraints.maxWidth * 0.05,
+          right: constraints.maxWidth * 0.05),
+      child: SizedBox(
+        width: constraints.maxWidth,
+        height: 50,
+        child: TextField(
+          controller: _controller,
+          onSubmitted: (value) {
+            widget.shopBloc.insertData(value);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _showData(
+    ShopState state,
+    BoxConstraints constraints,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(
+          top: 20,
+          left: constraints.maxWidth * 0.05,
+          right: constraints.maxWidth * 0.05),
+      child: Container(
+        width: constraints.maxWidth,
+        height: 500,
+        decoration: const BoxDecoration(
+            color: Colors.purple,
+            borderRadius: BorderRadius.all(Radius.circular(5))),
+        child: ListView.separated(
+          itemCount: state.data.length,
+          itemBuilder: (context, i) {
+            return Card(
+              child: ListTile(
+                title: Text("ID: ${state.data[i]['id']}"),
+                subtitle: Text("ID: ${state.data[i]['name']}"),
+              ),
+            );
+          },
+          separatorBuilder: (context, i) {
+            return const SizedBox(
+              height: 10,
+            );
+          },
+        ),
+      ),
     );
   }
 }
