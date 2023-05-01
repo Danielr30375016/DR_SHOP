@@ -3,9 +3,11 @@ import 'package:dr_shop/ui/shop/shop_screen.dart';
 import 'package:dr_shop/utils/theme.dart';
 import 'package:dr_shop/utils/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
   initializeDepencies();
   runApp(const MyApp());
 }
