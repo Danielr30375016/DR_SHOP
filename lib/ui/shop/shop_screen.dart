@@ -2,6 +2,7 @@ import 'package:dr_shop/di/injector.dart';
 import 'package:dr_shop/ui/shop/shop_bloc.dart';
 import 'package:dr_shop/ui/shop/shop_state.dart';
 import 'package:dr_shop/ui/shopping_cart/shopping_cart_screen.dart';
+import 'package:dr_shop/ui/widgets/text_field_web.dart';
 import 'package:dr_shop/utils/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,9 +17,31 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _controllerText1 = TextEditingController();
+  final TextEditingController _controllerText2 = TextEditingController();
+
+  @override
+  void initState() {
+    _controller;
+    _controllerText1;
+    _controllerText2;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _controllerText1.dispose();
+    _controllerText2.dispose();
+    super.dispose();
+  }
 
   bool switchActive = false;
+  String text1 = "";
+  String text2 = "";
+  String text3 = "";
+
   @override
   Widget build(BuildContext context) {
     final theme = Provider.of<ThemeChanger>(context);
@@ -34,7 +57,7 @@ class _ShopScreenState extends State<ShopScreen> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               widget.shopBloc.firstState();
             });
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           } else {
             return _body(state);
           }
@@ -51,8 +74,27 @@ class _ShopScreenState extends State<ShopScreen> {
           children: [
             _switchTheme(context, constraints),
             _changePage(),
-            _textField(constraints),
+            TextFieldWeb(
+              constraints: constraints,
+              onTap: (value) {
+                text1 = value;
+              },
+            ),
+            TextFieldWeb(
+              constraints: constraints,
+              onTap: (value) {
+                text2 = value;
+              },
+            ),
+            TextFieldWeb(
+              constraints: constraints,
+              onTap: (value) {
+                text3 = value;
+              },
+            ),
+            _button(state, constraints),
             _showData(state, constraints),
+            _searchUser(state, constraints),
           ],
         ),
       );
@@ -101,20 +143,37 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  Widget _textField(BoxConstraints constraints) {
+  Widget _button(
+    ShopState state,
+    BoxConstraints constraints,
+  ) {
     return Padding(
       padding: EdgeInsets.only(
-          top: 20,
-          left: constraints.maxWidth * 0.05,
-          right: constraints.maxWidth * 0.05),
-      child: SizedBox(
-        width: constraints.maxWidth,
-        height: 50,
-        child: TextField(
-          controller: _controller,
-          onSubmitted: (value) {
-            widget.shopBloc.insertData(value);
-          },
+        top: 20,
+        left: constraints.maxWidth * 0.05,
+        right: constraints.maxWidth * 0.05,
+      ),
+      child: Card(
+        child: Container(
+          height: 50,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          child: InkWell(
+            onTap: () {
+              widget.shopBloc.insertData(
+                int.parse(text1),
+                text2,
+                text3,
+              );
+            },
+            child: const Text(
+              "Guardar",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ),
       ),
     );
@@ -136,12 +195,12 @@ class _ShopScreenState extends State<ShopScreen> {
             color: Colors.purple,
             borderRadius: BorderRadius.all(Radius.circular(5))),
         child: ListView.separated(
-          itemCount: state.data.length,
+          itemCount: state.listModel.length,
           itemBuilder: (context, i) {
             return Card(
               child: ListTile(
-                title: Text("ID: ${state.data[i]['id']}"),
-                subtitle: Text("ID: ${state.data[i]['name']}"),
+                title: Text("ID: ${state.listModel[i].username}"),
+                subtitle: Text("ID: ${state.listModel[i].email}"),
               ),
             );
           },
@@ -151,6 +210,81 @@ class _ShopScreenState extends State<ShopScreen> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _searchUser(
+    ShopState state,
+    BoxConstraints constraints,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: 20,
+        left: constraints.maxWidth * 0.05,
+        right: constraints.maxWidth * 0.05,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: constraints.maxWidth,
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: SizedBox(
+                      child: TextField(
+                        controller: _controller,
+                      ),
+                    ),
+                  ),
+                ),
+                Card(
+                  child: Container(
+                    width: constraints.maxWidth * 0.3,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        widget.shopBloc.searchUser(_controller.text);
+                      },
+                      child: const Text(
+                        "Buscar id",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: SizedBox(
+              width: constraints.maxWidth,
+              child: TextField(
+                controller: _controllerText1,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: SizedBox(
+              width: constraints.maxWidth,
+              child: TextField(
+                controller: _controllerText2,
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

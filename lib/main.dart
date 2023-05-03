@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 void main() async {
   await Hive.initFlutter();
+  await Hive.openBox('hive_local_db');
   initializeDepencies();
   runApp(const MyApp());
 }
